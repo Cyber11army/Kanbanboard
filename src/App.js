@@ -1,24 +1,37 @@
-import logo from './logo.svg';
+import { useEffect, useState } from 'react';
+import { Kanban } from '../src/components/Kanban';
+import Header from './components/Header';
 import './App.css';
+import { User } from '../src/components/User';
+import { Priority } from '../src/components/Priority';
+import { GETAPI } from '../src/api';
 
 function App() {
+
+  const [APIDATA, SETAPIDATA] = useState([])
+
+  const [displayType, setdisplayType] = useState(sessionStorage["TaskMenu"])
+  const handledataToDisplay = (value) => {
+    setdisplayType(value)
+    sessionStorage.setItem('TaskMenu', value)
+  }
+
+  useEffect(() => {
+    GETAPI('/v1/internal/frontend-assignment').then((data) => {
+      SETAPIDATA(data)
+    })
+  }, [])
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <Header DataVisible={handledataToDisplay} />
+      {
+        APIDATA.length !== 0 ? (displayType === 'user' ? <User apidata={APIDATA} /> :
+          displayType === 'priority' ? <Priority apidata={APIDATA} /> :
+            <Kanban apidata={APIDATA} />) : ''
+      }
+
+    </>
   );
 }
 
